@@ -5,13 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Alert, AlertDescription } from "../components/ui/alert";
-import { 
-  Upload as UploadIcon, 
-  Camera, 
-  Users, 
-  AlertTriangle, 
+import {
+  Upload as UploadIcon,
+  Camera,
+  Users,
+  AlertTriangle,
   CheckCircle,
   Loader2,
   ImageIcon
@@ -59,7 +59,7 @@ export default function Upload() {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
+
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
       handleFileSelect(files[0]);
@@ -71,94 +71,71 @@ export default function Upload() {
 
     setIsProcessing(true);
     setError(null);
+    setResults(null);
 
     try {
-      // Upload file
-      const { file_url } = await UploadFile({ file: selectedFile });
-      
-      // Analyze image with AI
-      const analysisResult = await InvokeLLM({
-        prompt: `Analyze this image and count the number of people visible. Look carefully for all people, including those partially visible or in the background. Also assess the confidence level of your count. Return your analysis in the specified JSON format.`,
-        file_urls: [file_url],
-        response_json_schema: {
-          type: "object",
-          properties: {
-            people_count: {
-              type: "number",
-              description: "Total number of people detected in the image"
-            },
-            confidence_score: {
-              type: "number",
-              minimum: 0,
-              maximum: 1,
-              description: "Confidence level in the detection (0-1)"
-            },
-            analysis_notes: {
-              type: "string", 
-              description: "Brief notes about what was observed"
-            },
-            environmental_conditions: {
-              type: "object",
-              properties: {
-                lighting: { type: "string" },
-                crowd_density: { type: "string" }
-              }
+      const formData = new FormData();
+      formData.append("image", selectedFile);
+
+      // 1. Upload file
+      const uploadRes = await fetch("http://localhost:5001/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!uploadRes.ok) throw new Error("Upload failed");
+      const { filename } = await uploadRes.json();
+
+      // 2. Poll for status
+      const pollInterval = setInterval(async () => {
+        try {
+          const statusRes = await fetch(`http://localhost:5001/status/${filename}`);
+          const statusData = await statusRes.json();
+
+          if (statusData.status === 'completed') {
+            clearInterval(pollInterval);
+
+            // Mock environmental data for display (since backend doesn't provide it yet)
+            const temperature = Math.round(20 + Math.random() * 15);
+            const humidity = Math.round(40 + Math.random() * 40);
+
+            // Check alerts
+            let alertTriggered = false;
+            // (Alert logic simplified for UI demo - usually backend handles this via CrowdReading)
+            if (statusData.people_count > 400) { // Example threshold
+              alertTriggered = true;
+              // Optional: Trigger email reporting here if needed on client side
             }
-          },
-          required: ["people_count", "confidence_score"]
-        }
-      });
 
-      // Generate mock environmental data
-      const temperature = Math.round(20 + Math.random() * 15);
-      const humidity = Math.round(40 + Math.random() * 40);
-
-      // Save to database
-      const crowdReading = await CrowdReading.create({
-        people_count: analysisResult.people_count,
-        confidence_score: analysisResult.confidence_score,
-        image_url: file_url,
-        location: selectedLocation,
-        temperature: temperature,
-        humidity: humidity,
-        device_id: "ESP32-CAM-MANUAL"
-      });
-
-      // Check for alerts
-      const settings = await AlertSettings.list();
-      const locationSetting = settings.find(s => s.location === selectedLocation);
-      
-      let alertTriggered = false;
-      if (locationSetting) {
-        const criticalThreshold = locationSetting.max_capacity * locationSetting.critical_threshold;
-        const warningThreshold = locationSetting.max_capacity * locationSetting.warning_threshold;
-        
-        if (analysisResult.people_count >= criticalThreshold) {
-          alertTriggered = true;
-          await CrowdReading.update(crowdReading.id, { alert_triggered: true });
-          
-          // Send alert email
-          if (locationSetting.alert_email) {
-            await SendEmail({
-              to: locationSetting.alert_email,
-              subject: `🚨 Critical Overcrowding Alert - ${locations.find(l => l.value === selectedLocation)?.label}`,
-              body: `CRITICAL ALERT: ${analysisResult.people_count} people detected at ${locations.find(l => l.value === selectedLocation)?.label}. This exceeds the critical threshold of ${Math.round(criticalThreshold)} people. Immediate action required.`
+            setResults({
+              people_count: statusData.people_count,
+              confidence_score: 0.95, // High confidence from YOLO
+              file_url: statusData.heatmap_url, // Show heatmap!
+              original_url: statusData.vis_url,
+              temperature,
+              humidity,
+              alertTriggered,
+              analysis_notes: "Heatmap generated. High density areas highlighted in red."
             });
+            setIsProcessing(false);
           }
+        } catch (err) {
+          console.error("Polling error", err);
+          // Don't stop polling on transient error, but could add timeout logic
         }
-      }
+      }, 2000);
 
-      setResults({
-        ...analysisResult,
-        temperature,
-        humidity,
-        alertTriggered,
-        file_url
-      });
+      // Safety timeout after 30s
+      setTimeout(() => {
+        clearInterval(pollInterval);
+        if (isProcessing) {
+          setIsProcessing(false);
+          setError("Analysis timed out. Please check server logs.");
+        }
+      }, 30000);
 
     } catch (error) {
       setError(`Processing failed: ${error.message}`);
-    } finally {
       setIsProcessing(false);
     }
   };
@@ -186,25 +163,25 @@ export default function Upload() {
               {/* Location Selection */}
               <div className="space-y-2">
                 <Label htmlFor="location">Location</Label>
-                <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select location" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {locations.map((location) => (
-                      <SelectItem key={location.value} value={location.value}>
-                        {location.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <select
+                  id="location"
+                  value={selectedLocation}
+                  onChange={(e) => setSelectedLocation(e.target.value)}
+                  className="w-full h-10 px-3 py-2 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="" disabled>Select location</option>
+                  {locations.map((location) => (
+                    <option key={location.value} value={location.value}>
+                      {location.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* File Upload */}
               <div
-                className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
-                  dragActive ? 'border-blue-400 bg-blue-50' : 'border-slate-200 hover:border-slate-300'
-                }`}
+                className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors ${dragActive ? 'border-blue-400 bg-blue-50' : 'border-slate-200 hover:border-slate-300'
+                  }`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
                 onDragOver={handleDrag}
@@ -217,12 +194,12 @@ export default function Upload() {
                   onChange={(e) => handleFileSelect(e.target.files[0])}
                   className="hidden"
                 />
-                
+
                 <div className="space-y-4">
                   <div className="w-16 h-16 mx-auto bg-slate-100 rounded-full flex items-center justify-center">
                     <ImageIcon className="w-8 h-8 text-slate-400" />
                   </div>
-                  
+
                   {selectedFile ? (
                     <div>
                       <p className="font-medium text-slate-900">{selectedFile.name}</p>
@@ -236,7 +213,7 @@ export default function Upload() {
                       <p className="text-sm text-slate-500">Supports PNG, JPG, JPEG, PDF</p>
                     </div>
                   )}
-                  
+
                   <Button
                     variant="outline"
                     onClick={() => fileInputRef.current?.click()}

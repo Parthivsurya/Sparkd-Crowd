@@ -2,8 +2,8 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Progress } from "../ui/progress";
-import { 
-  Users, 
+import {
+  Users,
   MapPin,
   ThermometerSun,
   Droplets,
@@ -14,7 +14,7 @@ import { format } from "date-fns";
 
 const locationNames = {
   main_entrance: "Main Entrance",
-  food_court: "Food Court", 
+  food_court: "Food Court",
   exhibition_hall: "Exhibition Hall",
   parking_area: "Parking Area",
   emergency_exit: "Emergency Exit"
@@ -23,7 +23,7 @@ const locationNames = {
 const locationIcons = {
   main_entrance: "🚪",
   food_court: "🍽️",
-  exhibition_hall: "🏛️", 
+  exhibition_hall: "🏛️",
   parking_area: "🚗",
   emergency_exit: "🚨"
 };
@@ -68,57 +68,58 @@ export default function LocationCards({ locations, settings, isLoading }) {
   };
 
   return (
-    <Card className="bg-white/80 backdrop-blur-sm border-slate-200/60">
+    <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-slate-200/60 dark:border-slate-800">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MapPin className="w-5 h-5 text-blue-600" />
+        <CardTitle className="flex items-center gap-2 text-slate-900 dark:text-white">
+          <MapPin className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           Location Overview
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {Object.entries(locations).map(([location, data]) => {
-            const capacityPercentage = getCapacityPercentage(location, data.current);
+            // Default max capacity to 100 if not set, as requested
             const maxCapacity = settings.find(s => s.location === location)?.max_capacity || 100;
-            
+            const capacityPercentage = Math.min(Math.round((data.current / maxCapacity) * 100), 100);
+
             return (
-              <div key={location} className="p-4 border border-slate-200 rounded-lg hover:shadow-md transition-shadow duration-200">
+              <div key={location} className="p-4 border border-slate-200 dark:border-slate-800 rounded-lg hover:shadow-md transition-shadow duration-200 bg-white dark:bg-slate-950/50">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <span className="text-lg">{locationIcons[location]}</span>
-                    <h3 className="font-semibold text-slate-900">{locationNames[location]}</h3>
+                    <h3 className="font-semibold text-slate-900 dark:text-white">{locationNames[location]}</h3>
                   </div>
                   {getStatusBadge(data.status)}
                 </div>
-                
+
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-slate-900">{data.current}</span>
-                    <span className="text-sm text-slate-500">/{maxCapacity} max</span>
+                    <span className="text-2xl font-bold text-slate-900 dark:text-white">{data.current}</span>
+                    <span className="text-sm text-slate-500 dark:text-slate-400">/{maxCapacity} max</span>
                   </div>
-                  
-                  <Progress 
-                    value={capacityPercentage} 
+
+                  <Progress
+                    value={capacityPercentage}
                     className="h-2"
                   />
-                  
+
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     {data.temperature && (
                       <div className="flex items-center gap-1">
                         <ThermometerSun className="w-4 h-4 text-orange-500" />
-                        <span className="text-slate-600">{data.temperature}°C</span>
+                        <span className="text-slate-600 dark:text-slate-400">{data.temperature}°C</span>
                       </div>
                     )}
                     {data.humidity && (
                       <div className="flex items-center gap-1">
-                        <Droplets className="w-4 h-4 text-blue-500" />
-                        <span className="text-slate-600">{data.humidity}%</span>
+                        <Droplets className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+                        <span className="text-slate-600 dark:text-slate-400">{data.humidity}%</span>
                       </div>
                     )}
                   </div>
-                  
+
                   {data.lastUpdate && (
-                    <div className="flex items-center gap-1 text-xs text-slate-400">
+                    <div className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500">
                       <Clock className="w-3 h-3" />
                       <span>Updated {format(new Date(data.lastUpdate), 'HH:mm:ss')}</span>
                     </div>

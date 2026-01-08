@@ -1,10 +1,10 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
-import { 
-  Settings, 
-  Upload, 
-  BarChart3, 
+import {
+  Settings,
+  Upload,
+  BarChart3,
   AlertTriangle,
   Download,
   RefreshCw
@@ -22,7 +22,7 @@ export default function QuickActions() {
       color: "bg-blue-500"
     },
     {
-      title: "View Analytics", 
+      title: "View Analytics",
       description: "Detailed reports",
       icon: BarChart3,
       url: createPageUrl("Analytics"),
@@ -30,7 +30,7 @@ export default function QuickActions() {
     },
     {
       title: "Alert Settings",
-      description: "Configure thresholds", 
+      description: "Configure thresholds",
       icon: Settings,
       url: createPageUrl("Settings"),
       color: "bg-green-500"
@@ -38,10 +38,10 @@ export default function QuickActions() {
   ];
 
   return (
-    <Card className="bg-white/80 backdrop-blur-sm border-slate-200/60">
+    <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-slate-200/60 dark:border-slate-800">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <AlertTriangle className="w-5 h-5 text-orange-600" />
+        <CardTitle className="flex items-center gap-2 text-slate-900 dark:text-white">
+          <AlertTriangle className="w-5 h-5 text-orange-600 dark:text-orange-500" />
           Quick Actions
         </CardTitle>
       </CardHeader>
@@ -50,30 +50,30 @@ export default function QuickActions() {
           <Link key={index} to={action.url}>
             <Button
               variant="outline"
-              className="w-full justify-start gap-3 p-4 h-auto hover:shadow-md transition-all duration-200"
+              className="w-full justify-start gap-3 p-4 h-auto hover:shadow-md transition-all duration-200 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:hover:bg-slate-700"
             >
               <div className={`p-2 rounded-lg ${action.color} bg-opacity-20`}>
                 <action.icon className={`w-4 h-4 ${action.color.replace('bg-', 'text-')}`} />
               </div>
               <div className="text-left">
                 <p className="font-medium">{action.title}</p>
-                <p className="text-sm text-slate-500">{action.description}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{action.description}</p>
               </div>
             </Button>
           </Link>
         ))}
-        
+
         <Button
           variant="outline"
-          className="w-full justify-start gap-3 p-4 h-auto hover:shadow-md transition-all duration-200"
+          className="w-full justify-start gap-3 p-4 h-auto hover:shadow-md transition-all duration-200 bg-white dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:hover:bg-slate-700"
           onClick={() => window.location.reload()}
         >
           <div className="p-2 rounded-lg bg-gray-500 bg-opacity-20">
-            <RefreshCw className="w-4 h-4 text-gray-500" />
+            <RefreshCw className="w-4 h-4 text-gray-500 dark:text-gray-400" />
           </div>
           <div className="text-left">
             <p className="font-medium">Refresh Data</p>
-            <p className="text-sm text-slate-500">Update all readings</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Update all readings</p>
           </div>
         </Button>
       </CardContent>

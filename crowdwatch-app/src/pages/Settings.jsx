@@ -5,10 +5,10 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Alert, AlertDescription } from "../components/ui/alert";
-import { 
-  Settings as SettingsIcon, 
-  Save, 
-  AlertTriangle, 
+import {
+  Settings as SettingsIcon,
+  Save,
+  AlertTriangle,
   Users,
   Phone,
   Mail,
@@ -37,7 +37,7 @@ export default function Settings() {
   const loadSettings = async () => {
     try {
       const data = await AlertSettings.list();
-      
+
       // Ensure all locations have settings
       const completeSettings = locations.map(location => {
         const existing = data.find(s => s.location === location.value);
@@ -53,7 +53,7 @@ export default function Settings() {
           ]
         };
       });
-      
+
       setSettings(completeSettings);
     } catch (error) {
       console.error("Error loading settings:", error);
@@ -63,47 +63,47 @@ export default function Settings() {
   };
 
   const updateSetting = (location, field, value) => {
-    setSettings(prev => prev.map(setting => 
-      setting.location === location 
+    setSettings(prev => prev.map(setting =>
+      setting.location === location
         ? { ...setting, [field]: value }
         : setting
     ));
   };
 
   const updateEmergencyContact = (location, contactIndex, field, value) => {
-    setSettings(prev => prev.map(setting => 
-      setting.location === location 
+    setSettings(prev => prev.map(setting =>
+      setting.location === location
         ? {
-            ...setting,
-            emergency_contacts: setting.emergency_contacts.map((contact, index) =>
-              index === contactIndex ? { ...contact, [field]: value } : contact
-            )
-          }
+          ...setting,
+          emergency_contacts: setting.emergency_contacts.map((contact, index) =>
+            index === contactIndex ? { ...contact, [field]: value } : contact
+          )
+        }
         : setting
     ));
   };
 
   const addEmergencyContact = (location) => {
-    setSettings(prev => prev.map(setting => 
-      setting.location === location 
+    setSettings(prev => prev.map(setting =>
+      setting.location === location
         ? {
-            ...setting,
-            emergency_contacts: [
-              ...(setting.emergency_contacts || []),
-              { name: "", phone: "", role: "" }
-            ]
-          }
+          ...setting,
+          emergency_contacts: [
+            ...(setting.emergency_contacts || []),
+            { name: "", phone: "", role: "" }
+          ]
+        }
         : setting
     ));
   };
 
   const removeEmergencyContact = (location, contactIndex) => {
-    setSettings(prev => prev.map(setting => 
-      setting.location === location 
+    setSettings(prev => prev.map(setting =>
+      setting.location === location
         ? {
-            ...setting,
-            emergency_contacts: setting.emergency_contacts.filter((_, index) => index !== contactIndex)
-          }
+          ...setting,
+          emergency_contacts: setting.emergency_contacts.filter((_, index) => index !== contactIndex)
+        }
         : setting
     ));
   };
@@ -133,10 +133,10 @@ export default function Settings() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-4 md:p-8">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-blue-950 p-4 md:p-8 transition-colors duration-300">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-slate-900">Loading Settings...</h1>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Loading Settings...</h1>
           </div>
         </div>
       </div>
@@ -144,13 +144,13 @@ export default function Settings() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-blue-950 p-4 md:p-8 transition-colors duration-300">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-blue-900 bg-clip-text text-transparent mb-2">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-blue-900 dark:from-white dark:to-blue-200 bg-clip-text text-transparent mb-2">
             Alert Settings
           </h1>
-          <p className="text-slate-600">Configure overcrowding thresholds and emergency contacts for each location</p>
+          <p className="text-slate-600 dark:text-slate-400">Configure overcrowding thresholds and emergency contacts for each location</p>
         </div>
 
         {message && (
@@ -166,10 +166,10 @@ export default function Settings() {
           {settings.map((setting) => {
             const location = locations.find(l => l.value === setting.location);
             return (
-              <Card key={setting.location} className="bg-white/80 backdrop-blur-sm border-slate-200/60">
+              <Card key={setting.location} className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-slate-200/60 dark:border-slate-800">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <SettingsIcon className="w-5 h-5 text-blue-600" />
+                  <CardTitle className="flex items-center gap-2 text-slate-900 dark:text-white">
+                    <SettingsIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     {location?.label}
                   </CardTitle>
                 </CardHeader>
@@ -177,7 +177,7 @@ export default function Settings() {
                   {/* Capacity Settings */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor={`capacity-${setting.location}`}>Maximum Capacity</Label>
+                      <Label htmlFor={`capacity-${setting.location}`} className="text-slate-700 dark:text-slate-300">Maximum Capacity</Label>
                       <div className="relative">
                         <Users className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
                         <Input
@@ -185,13 +185,13 @@ export default function Settings() {
                           type="number"
                           value={setting.max_capacity}
                           onChange={(e) => updateSetting(setting.location, 'max_capacity', parseInt(e.target.value))}
-                          className="pl-10"
+                          className="pl-10 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white"
                           placeholder="100"
                         />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor={`warning-${setting.location}`}>Warning Threshold (%)</Label>
+                      <Label htmlFor={`warning-${setting.location}`} className="text-slate-700 dark:text-slate-300">Warning Threshold (%)</Label>
                       <Input
                         id={`warning-${setting.location}`}
                         type="number"
@@ -200,10 +200,11 @@ export default function Settings() {
                         value={Math.round(setting.warning_threshold * 100)}
                         onChange={(e) => updateSetting(setting.location, 'warning_threshold', parseInt(e.target.value) / 100)}
                         placeholder="80"
+                        className="bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor={`critical-${setting.location}`}>Critical Threshold (%)</Label>
+                      <Label htmlFor={`critical-${setting.location}`} className="text-slate-700 dark:text-slate-300">Critical Threshold (%)</Label>
                       <Input
                         id={`critical-${setting.location}`}
                         type="number"
@@ -212,13 +213,14 @@ export default function Settings() {
                         value={Math.round(setting.critical_threshold * 100)}
                         onChange={(e) => updateSetting(setting.location, 'critical_threshold', parseInt(e.target.value) / 100)}
                         placeholder="90"
+                        className="bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white"
                       />
                     </div>
                   </div>
 
                   {/* Alert Email */}
                   <div className="space-y-2">
-                    <Label htmlFor={`email-${setting.location}`}>Alert Email</Label>
+                    <Label htmlFor={`email-${setting.location}`} className="text-slate-700 dark:text-slate-300">Alert Email</Label>
                     <div className="relative">
                       <Mail className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
                       <Input
@@ -226,7 +228,7 @@ export default function Settings() {
                         type="email"
                         value={setting.alert_email}
                         onChange={(e) => updateSetting(setting.location, 'alert_email', e.target.value)}
-                        className="pl-10"
+                        className="pl-10 bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white"
                         placeholder="admin@facility.com"
                       />
                     </div>
@@ -235,7 +237,7 @@ export default function Settings() {
                   {/* Emergency Contacts */}
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <Label>Emergency Contacts</Label>
+                      <Label className="text-slate-700 dark:text-slate-300">Emergency Contacts</Label>
                       <Button
                         type="button"
                         variant="outline"
@@ -247,14 +249,15 @@ export default function Settings() {
                         Add Contact
                       </Button>
                     </div>
-                    
+
                     <div className="space-y-3">
                       {(setting.emergency_contacts || []).map((contact, index) => (
-                        <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-3 p-4 border border-slate-200 rounded-lg bg-slate-50">
+                        <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-3 p-4 border border-slate-200 dark:border-slate-800 rounded-lg bg-slate-50 dark:bg-slate-950/50">
                           <Input
                             placeholder="Contact Name"
                             value={contact.name}
                             onChange={(e) => updateEmergencyContact(setting.location, index, 'name', e.target.value)}
+                            className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white"
                           />
                           <div className="relative">
                             <Phone className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
@@ -262,13 +265,14 @@ export default function Settings() {
                               placeholder="Phone Number"
                               value={contact.phone}
                               onChange={(e) => updateEmergencyContact(setting.location, index, 'phone', e.target.value)}
-                              className="pl-10"
+                              className="pl-10 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white"
                             />
                           </div>
                           <Input
                             placeholder="Role/Department"
                             value={contact.role}
                             onChange={(e) => updateEmergencyContact(setting.location, index, 'role', e.target.value)}
+                            className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white"
                           />
                           <Button
                             type="button"
@@ -285,9 +289,9 @@ export default function Settings() {
                   </div>
 
                   {/* Capacity Preview */}
-                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <h4 className="font-medium text-blue-900 mb-2">Threshold Preview</h4>
-                    <div className="space-y-2 text-sm text-blue-800">
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <h4 className="font-medium text-blue-900 dark:text-blue-200 mb-2">Threshold Preview</h4>
+                    <div className="space-y-2 text-sm text-blue-800 dark:text-blue-300">
                       <div>• Warning Alert: {Math.round(setting.max_capacity * setting.warning_threshold)} people ({Math.round(setting.warning_threshold * 100)}%)</div>
                       <div>• Critical Alert: {Math.round(setting.max_capacity * setting.critical_threshold)} people ({Math.round(setting.critical_threshold * 100)}%)</div>
                     </div>

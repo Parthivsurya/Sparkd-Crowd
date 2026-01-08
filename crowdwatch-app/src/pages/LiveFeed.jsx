@@ -66,7 +66,7 @@ export default function LiveFeed() {
                             <div className="relative aspect-video bg-slate-100 dark:bg-slate-950">
                                 <img
                                     src={`http://localhost:5001/vis/${img.filename}`}
-                                    alt="Live Feed"
+                                    alt="Surveillance Feed"
                                     className="w-full h-full object-cover"
                                     loading="lazy"
                                     onError={(e) => {

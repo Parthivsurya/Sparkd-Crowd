@@ -318,7 +318,7 @@ export default function Upload() {
                       <Label>Processed Image</Label>
                       <img
                         src={results.file_url}
-                        alt="Analyzed crowd image"
+                        alt="Analyzed crowd snapshot"
                         className="w-full h-48 object-cover rounded-lg border border-slate-200"
                       />
                     </div>
